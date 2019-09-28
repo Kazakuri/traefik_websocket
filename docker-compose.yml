@@ -1,0 +1,28 @@
+version: "3"
+services:
+  app:
+    build: .
+    networks: 
+      - test
+    ports:
+      - 5000:5000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Path(`/`) || Path(`/socket.io/`)"
+      - "traefik.http.routers.app.entryPoints=web"
+      - "traefik.http.routers.app-secure.rule=Path(`/`) || Path(`/socket.io/`)"
+      - "traefik.http.routers.app-secure.entryPoints=web-secure"
+      - "traefik.http.routers.app-secure.tls.options=foo"
+  traefik:
+    image: traefik:v2.0.1
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}/config/traefik.yml:/traefik.yml
+    networks: 
+      - test
+networks:
+   test:
